@@ -11,22 +11,22 @@ function Signup() {
         <div className="login-card">
           <div className="login-content">
             <h1 className="login-title">Welcome</h1>
-            <Tabs defaultValue="student">
+            <Tabs defaultValue="Student">
               <TabsList>
-                <TabsTrigger value="student">
+                <TabsTrigger value="Student">
                   <BookOpenIcon />
                   Student
                 </TabsTrigger>
-                <TabsTrigger value="admin">
+                <TabsTrigger value="Admin">
                   <ShieldCheckIcon />
                   Admin
                 </TabsTrigger>
               </TabsList>
-              <TabsContent value="student">
-                <LoginForm userType="Student" />
+              <TabsContent value="Student">
+                <SignupForm role="Student" />
               </TabsContent>
-              <TabsContent value="admin">
-                <LoginForm userType="Admin" />
+              <TabsContent value="Admin">
+                <SignupForm role="Admin" />
               </TabsContent>
             </Tabs>
           </div>
@@ -36,24 +36,25 @@ function Signup() {
   );
 }
 
-function LoginForm({ userType }) {
+function SignupForm({ role }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [phone, setPhone] = useState(""); // Added phone field
+  const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Submitting data:", { name, email, password, phone }); // Log data being sent
+    const data = { name, email, password, phone, role }; // Include the role dynamically
+
     axios
-      .post("http://localhost:3001/register", { name, email, password, phone })
+      .post("http://localhost:3001/register", data)
       .then((result) => {
         setSuccess("Registration successful!");
         setError(""); // Clear any previous errors
-        navigate("/login")
+        navigate("/login"); // Navigate to login page on successful registration
       })
       .catch((err) => {
         setError(err.response?.data?.error || "An error occurred. Please try again.");
@@ -67,10 +68,10 @@ function LoginForm({ userType }) {
       {success && <p className="success">{success}</p>}
 
       <div className="form-group">
-        <label htmlFor={`${userType.toLowerCase()}-name`}>Name</label>
+        <label htmlFor={`${role.toLowerCase()}-name`}>Name</label>
         <input
-          id={`${userType.toLowerCase()}-name`}
-          placeholder={`${userType} Name`}
+          id={`${role.toLowerCase()}-name`}
+          placeholder={`${role} Name`}
           type="text"
           onChange={(e) => setName(e.target.value)}
           required
@@ -78,10 +79,10 @@ function LoginForm({ userType }) {
       </div>
 
       <div className="form-group">
-        <label htmlFor={`${userType.toLowerCase()}-email`}>Email</label>
+        <label htmlFor={`${role.toLowerCase()}-email`}>Email</label>
         <input
-          id={`${userType.toLowerCase()}-email`}
-          placeholder={`${userType} Email`}
+          id={`${role.toLowerCase()}-email`}
+          placeholder={`${role} Email`}
           type="email"
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -89,10 +90,10 @@ function LoginForm({ userType }) {
       </div>
 
       <div className="form-group">
-        <label htmlFor={`${userType.toLowerCase()}-phone`}>Phone</label>
+        <label htmlFor={`${role.toLowerCase()}-phone`}>Phone</label>
         <input
-          id={`${userType.toLowerCase()}-phone`}
-          placeholder={`${userType} Phone`}
+          id={`${role.toLowerCase()}-phone`}
+          placeholder={`${role} Phone`}
           type="tel"
           pattern="^\+?[0-9]{10,15}$"
           onChange={(e) => setPhone(e.target.value)}
@@ -101,10 +102,10 @@ function LoginForm({ userType }) {
       </div>
 
       <div className="form-group">
-        <label htmlFor={`${userType.toLowerCase()}-password`}>Password</label>
+        <label htmlFor={`${role.toLowerCase()}-password`}>Password</label>
         <input
-          id={`${userType.toLowerCase()}-password`}
-          placeholder={`${userType} Password`}
+          id={`${role.toLowerCase()}-password`}
+          placeholder={`${role} Password`}
           type="password"
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -112,7 +113,7 @@ function LoginForm({ userType }) {
       </div>
 
       <button type="submit" className="submit-button">
-        Register
+        Register as {role}
       </button>
 
       <p>Already have an account?</p>
@@ -125,16 +126,22 @@ function LoginForm({ userType }) {
 
 function Tabs({ defaultValue, children }) {
   const [activeTab, setActiveTab] = useState(defaultValue);
-  return <div className="tabs">{React.Children.map(children, child => React.cloneElement(child, { activeTab, setActiveTab }))}</div>;
+  return <div className="tabs">{React.Children.map(children, (child) => React.cloneElement(child, { activeTab, setActiveTab }))}</div>;
 }
 
 function TabsList({ children, activeTab, setActiveTab }) {
-  return <div className="tabs-list">{React.Children.map(children, child => React.cloneElement(child, { isActive: child.props.value === activeTab, onClick: () => setActiveTab(child.props.value) }))}</div>;
+  return (
+    <div className="tabs-list">
+      {React.Children.map(children, (child) =>
+        React.cloneElement(child, { isActive: child.props.value === activeTab, onClick: () => setActiveTab(child.props.value) })
+      )}
+    </div>
+  );
 }
 
 function TabsTrigger({ value, children, isActive, onClick }) {
   return (
-    <button className={`tab-trigger ${isActive ? 'active' : ''} ${value}`} onClick={onClick}>
+    <button className={`tab-trigger ${isActive ? "active" : ""} ${value}`} onClick={onClick}>
       {children}
     </button>
   );

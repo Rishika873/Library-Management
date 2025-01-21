@@ -1,23 +1,41 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import "../src/stylings/student.css";
 import { BookOpen, User, LogOut, FileText, Home } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import RequestBook from './RequestBook';
 import BookReport from './BookReport';
 
- function StudentHome() {
+function StudentHome() {
   const [isLoading, setIsLoading] = useState(true);
-  const [activeMenu, setActiveMenu] = useState('request');
+  const [userData, setUserData] = useState({});
+  const [activeMenu, setActiveMenu] = useState('welcome');  // Set 'welcome' as default menu
   const navigate = useNavigate();
-  const [userData, setUserData] = useState({
-    name: 'salman',
-    email: 'idno22382@gmail.com',
-    accountType: 'student'
-  });
 
   useEffect(() => {
-    setTimeout(() => setIsLoading(false), 1000);
-  }, []);
+    const fetchUserData = async () => {
+      const token = localStorage.getItem("jwtToken");
+
+      if (token) {
+        try {
+          const response = await axios.get("http://localhost:3001/tostudent", {
+            headers: {
+              Authorization: `Bearer ${token}`,  // Correct way to pass token
+            },
+          });
+          setUserData(response.data);
+          setIsLoading(false);
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          setIsLoading(false);
+        }
+      } else {
+        navigate("/login");
+      }
+    };
+
+    fetchUserData();
+  }, [navigate]);
 
   const handleMenuClick = (menu) => {
     setActiveMenu(menu);
@@ -26,6 +44,7 @@ import BookReport from './BookReport';
   };
 
   const handleLogout = () => {
+    localStorage.removeItem("jwtToken");
     setIsLoading(true);
     setTimeout(() => {
       alert('Logged out successfully!');
@@ -57,11 +76,9 @@ import BookReport from './BookReport';
             </div>
           </div>
         );
-        // In the renderContent function, add this case:
       case 'report':
         return <BookReport />;
-
-
+      case 'welcome':
       default:
         return <div className="welcome-message">Welcome to the Library Management System</div>;
     }
@@ -80,34 +97,22 @@ import BookReport from './BookReport';
     <div className="dashboard-container">
       <div className="sidebar">
         <nav className="nav-menu">
-          <button
-            className={`nav-item ${activeMenu === 'welcome' ? 'active' : ''}`}
-            onClick={() => handleMenuClick('welcome')}
-          >
+          <button className={`nav-item ${activeMenu === 'welcome' ? 'active' : ''}`} onClick={() => handleMenuClick('welcome')}>
             <Home className="nav-icon" />
             <span>Welcome</span>
           </button>
 
-          <button
-            className={`nav-item ${activeMenu === 'account' ? 'active' : ''}`}
-            onClick={() => handleMenuClick('account')}
-          >
+          <button className={`nav-item ${activeMenu === 'account' ? 'active' : ''}`} onClick={() => handleMenuClick('account')}>
             <User className="nav-icon" />
             <span>My Account</span>
           </button>
 
-          <button
-            className={`nav-item ${activeMenu === 'request' ? 'active' : ''}`}
-            onClick={() => handleMenuClick('request')}
-          >
+          <button className={`nav-item ${activeMenu === 'request' ? 'active' : ''}`} onClick={() => handleMenuClick('request')}>
             <BookOpen className="nav-icon" />
             <span>Request Book</span>
           </button>
 
-          <button
-            className={`nav-item ${activeMenu === 'report' ? 'active' : ''}`}
-            onClick={() => handleMenuClick('report')}
-          >
+          <button className={`nav-item ${activeMenu === 'report' ? 'active' : ''}`} onClick={() => handleMenuClick('report')}>
             <FileText className="nav-icon" />
             <span>Book Report</span>
           </button>
@@ -128,4 +133,5 @@ import BookReport from './BookReport';
     </div>
   );
 }
-export default StudentHome
+
+export default StudentHome;

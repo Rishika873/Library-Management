@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 
-// Employee Schema with Validation
 const EmployeeSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -11,17 +10,22 @@ const EmployeeSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    match: [/\S+@\S+\.\S+/, "is invalid"], // Email validation
+    match: [/\S+@\S+\.\S+/, "is invalid"],
   },
   password: {
     type: String,
     required: true,
-    minlength: 6, // Minimum password length
+    minlength: 6,
   },
   phone: {
     type: String,
     required: true,
-    match: [/^\+?[0-9]{10,15}$/, "is invalid"], // Phone validation regex
+    match: [/^\+?[0-9]{10,15}$/, "is invalid"],
+  },
+  role: {
+    type: String,
+    required: true,
+    enum: ["Student", "Admin"],
   },
 });
 

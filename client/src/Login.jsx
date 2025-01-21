@@ -11,22 +11,22 @@ function Login() {
         <div className="login-card">
           <div className="login-content">
             <h1 className="login-title">Welcome</h1>
-            <Tabs defaultValue="student">
+            <Tabs defaultValue="Student">
               <TabsList>
-                <TabsTrigger value="student">
+                <TabsTrigger value="Student">
                   <BookOpenIcon />
                   Student
                 </TabsTrigger>
-                <TabsTrigger value="admin">
+                <TabsTrigger value="Admin">
                   <ShieldCheckIcon />
                   Admin
                 </TabsTrigger>
               </TabsList>
-              <TabsContent value="student">
-                <LoginForm userType="Student" />
+              <TabsContent value="Student">
+                <LoginForm role="Student" />
               </TabsContent>
-              <TabsContent value="admin">
-                <LoginForm userType="Admin" />
+              <TabsContent value="Admin">
+                <LoginForm role="Admin" />
               </TabsContent>
             </Tabs>
           </div>
@@ -36,7 +36,7 @@ function Login() {
   );
 }
 
-function LoginForm({ userType }) {
+function LoginForm({ role }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -46,21 +46,21 @@ function LoginForm({ userType }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .post("http://localhost:3001/login", { email, password })
+      .post("http://localhost:3001/login", { email, password, role })
       .then((result) => {
         setSuccess("Login successful!");
-        setError(""); // Clear any previous errors
+        setError(""); // Clear previous errors
+        localStorage.setItem("jwtToken", result.data.token); // Store the JWT token
 
-        // Navigate based on userType (Student or Admin)
-        if (userType === "Student") {
-          navigate('/tostudent'); // Redirect to student page
-        } else if (userType === "Admin") {
-          navigate('/toadmin'); // Redirect to admin page
+        if (role === "Student") {
+          navigate("/tostudent");
+        } else if (role === "Admin") {
+          navigate("/toadmin");
         }
       })
       .catch((err) => {
         setError(err.response?.data?.error || "An error occurred. Please try again.");
-        setSuccess(""); // Clear any previous success messages
+        setSuccess(""); // Clear previous success messages
       });
   };
 
@@ -70,10 +70,10 @@ function LoginForm({ userType }) {
       {success && <p className="success">{success}</p>}
 
       <div className="form-group">
-        <label htmlFor={`${userType.toLowerCase()}-email`}>Email</label>
+        <label htmlFor={`${role.toLowerCase()}-email`}>Email</label>
         <input
-          id={`${userType.toLowerCase()}-email`}
-          placeholder={`${userType} Email`}
+          id={`${role.toLowerCase()}-email`}
+          placeholder={`${role} Email`}
           type="email"
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -81,10 +81,10 @@ function LoginForm({ userType }) {
       </div>
 
       <div className="form-group">
-        <label htmlFor={`${userType.toLowerCase()}-password`}>Password</label>
+        <label htmlFor={`${role.toLowerCase()}-password`}>Password</label>
         <input
-          id={`${userType.toLowerCase()}-password`}
-          placeholder={`${userType} Password`}
+          id={`${role.toLowerCase()}-password`}
+          placeholder={`${role} Password`}
           type="password"
           onChange={(e) => setPassword(e.target.value)}
           required
