@@ -105,16 +105,22 @@ function LoginForm({ role }) {
 
 function Tabs({ defaultValue, children }) {
   const [activeTab, setActiveTab] = useState(defaultValue);
-  return <div className="tabs">{React.Children.map(children, child => React.cloneElement(child, { activeTab, setActiveTab }))}</div>;
+  return <div className="tabs">{React.Children.map(children, (child) => React.cloneElement(child, { activeTab, setActiveTab }))}</div>;
 }
 
 function TabsList({ children, activeTab, setActiveTab }) {
-  return <div className="tabs-list">{React.Children.map(children, child => React.cloneElement(child, { isActive: child.props.value === activeTab, onClick: () => setActiveTab(child.props.value) }))}</div>;
+  return (
+    <div className="tabs-list">
+      {React.Children.map(children, (child) =>
+        React.cloneElement(child, { isActive: child.props.value === activeTab, onClick: () => setActiveTab(child.props.value) })
+      )}
+    </div>
+  );
 }
 
 function TabsTrigger({ value, children, isActive, onClick }) {
   return (
-    <button className={`tab-trigger ${isActive ? 'active' : ''} ${value}`} onClick={onClick}>
+    <button className={`tab-trigger ${isActive ? "active" : ""} ${value}`} onClick={onClick}>
       {children}
     </button>
   );

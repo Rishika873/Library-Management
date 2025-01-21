@@ -8,29 +8,39 @@ import BookReport from './BookReport';
 
 function StudentHome() {
   const [isLoading, setIsLoading] = useState(true);
-  const [userData, setUserData] = useState({});
-  const [activeMenu, setActiveMenu] = useState('welcome');  // Set 'welcome' as default menu
+  const [userData, setUserData] = useState(null); // Initialize as null to handle loading state
+  const [activeMenu, setActiveMenu] = useState('welcome');
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserData = async () => {
       const token = localStorage.getItem("jwtToken");
 
-      if (token) {
-        try {
-          const response = await axios.get("http://localhost:3001/tostudent", {
-            headers: {
-              Authorization: `Bearer ${token}`,  // Correct way to pass token
-            },
-          });
-          setUserData(response.data);
-          setIsLoading(false);
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-          setIsLoading(false);
+      if (!token) {
+        navigate("/login"); // Redirect to login if no token exists
+        return;
+      }
+
+      try {
+        console.log("Token from localStorage:", token); // Debugging
+
+        // Send token as Bearer token in the Authorization header
+        const response = await axios.get("http://localhost:3001/tostudent", {
+          headers: {
+            Authorization: `Bearer ${token}`, // Adding Bearer token to request
+          },
+        });
+
+        setUserData(response.data); // Assuming response.data contains name, email, role
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        if (error.response && error.response.status === 403) {
+          alert("Session expired or invalid token. Please log in again.");
+          localStorage.removeItem("jwtToken");
+          navigate("/login");
         }
-      } else {
-        navigate("/login");
+        setIsLoading(false);
       }
     };
 
@@ -63,15 +73,15 @@ function StudentHome() {
             <div className="info-card">
               <div className="info-item">
                 <label>Person Name:</label>
-                <span className="info-value">{userData.name}</span>
+                <span className="info-value">{userData?.name || 'N/A'}</span> {/* Safe access to userData */}
               </div>
               <div className="info-item">
                 <label>Person Email:</label>
-                <span className="info-value">{userData.email}</span>
+                <span className="info-value">{userData?.email || 'N/A'}</span>
               </div>
               <div className="info-item">
                 <label>Account Type:</label>
-                <span className="info-value">{userData.accountType}</span>
+                <span className="info-value">{userData?.role || 'N/A'}</span> {/* Safe access */}
               </div>
             </div>
           </div>
